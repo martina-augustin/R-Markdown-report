@@ -1,0 +1,71 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Lato:wght@400;600&family=Teko:wght@600&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Lato:wght@400;600&family=Staatliches&display=swap');
+
+
+.author,.title{
+    display: none;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+}
+
+h1, .h1 {
+  margin-top: 10px;
+  font-family: 'Alex Brush', cursive;
+  font-size: 5em
+}
+
+h2, .h2 {
+  margin-top: 10px;
+  margin-bottom: 100px;  
+  font-family: "Lato", sans-serif;
+  font-size:12.6px;
+}
+
+h3, .h3 {
+  margin-top: 100px;
+  margin-bottom: 20px;  
+  font-family: "Lato", sans-serif;
+  font-size:12.6px;
+}
+
+h4, .h4 {
+  margin-top: 80px;
+  margin-bottom: 20px;
+  font-family: "Lato", sans-serif;
+  font-size: 15px;
+  font-weight: 600
+} 
+
+h5, .h5 {
+  margin-bottom: 20px;  
+  font-family: "Staatliches", monospace;
+  font-size:35px;
+}
+
+h6, .h6 {
+  margin-top: 10px;
+  margin-bottom: 20px;  
+  font-family: "Lato", sans-serif;
+  font-size:12.6px;
+}
+
+
+.caption {
+  font-size: 0.9em;
+  font-style: italic;
+  color: grey;
+  margin-right: 10%;
+  margin-left: 10%;  
+  text-align: center;
+}
+
+.container-fluid .main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+

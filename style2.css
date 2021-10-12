@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Lato:wght@400;600&family=Staatliches&display=swap');
+
+.author,.title{
+    display: none;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-size: 12px;
+  font-weight: 400
+}
+
+h1, .h1 {
+  margin-top: 10px;
+  font-family: 'Alex Brush', cursive;
+  font-size: 4.5em
+}
+
+h2, .h2 {
+  margin-top: 10px;
+  margin-bottom: 60px;  
+  font-size: 12px
+}
+
+h3, .h3 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-size: 12px
+}
+
+h4, .h4 {
+  margin-top: 60px;
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  font-weight: 700
+} 
+
+h5, .h5 {
+  margin-top:0;
+  margin-bottom: 20px;  
+  font-family: "Staatliches", monospace;
+  font-size:25px;
+}
+
+h6, .h6 {
+  margin-top: 10px;
+  margin-bottom: 15px;  
+  font-size: 12px
+}
+
+.caption {
+  font-size: 0.9em;
+  font-style: italic;
+  color: grey;
+  margin-right: 10%;
+  margin-left: 10%;  
+  text-align: center;
+}
+
+.container-fluid .main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.table tbody tr td {
+    padding: 7px 9px;
+    line-height: 1.42857143;
+    vertical-align: top;
+    border-top: .5px solid #f2f2f2;
+}
+
+.table thead tr th {
+    padding: 7px 9px;
+    vertical-align: bottom;
+    border-bottom: 2px solid #e9e9e9;
+}
