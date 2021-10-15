@@ -1,6 +1,6 @@
 ---
 title: speech feedback
-author: Manchester Communicators
+author: public speaking club
 output:
   html_document:
     css: style2.css
@@ -10,8 +10,8 @@ knit: pagedown::chrome_print
 always_allow_html: true
 params:
   year: "2021"
-  month: "05"
-  day: "17"
+  month: "10"
+  day: "18"
   s: 3
   speechtitle: ""
 ---
@@ -26,56 +26,30 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 
-##############################################################
-#.............. S E T   U P   ! ! ! 
-# meeting_year <- "2021"
-# meeting_month <- "01"
-# meeting_day <- "18"
+#######################################   S E T   U P   ##############################################
 meeting_date <- as.numeric(paste0(params$year, params$month, params$day))
-
-#............. run fpr speaker s (1, 2, 3 or 4)
 s <- params$s
-##############################################################
 
-
-
+####################################   L I B R A R I E S   ###########################################
 if (!require(ggplot2)) {install.packages("ggplot2"); library(ggplot2)}
 if (!require(stringr)) {install.packages("stringr"); library(stringr)}
 if (!require(reshape2)) {install.packages("reshape2"); library(reshape2)}
-# if (!require(tidytext)) {install.packages("tidytext"); library(tidytext)}
 if (!require(dplyr)) {install.packages("dplyr"); library(dplyr)}
-# if (!require(tidyr)) {install.packages("tidyr"); library(tidyr)}
 if (!require(ggiraph)) {install.packages("ggiraph"); library(ggiraph)}
 if (!require(extrafont)) {install.packages("extrafont"); library(extrafont)}
 if (!require(scales)) {install.packages("scales"); library(scales)}
-# if (!require(reactable)) {install.packages("reactable"); library(reactable)}
-# if (!require(tinytex)) {install.packages("tinytex"); library(tinytex)}
 if (!require(pagedown)) {install.packages("pagedown"); library(pagedown)}
-# if (!require(kableExtra)) {install.packages("kableExtra"); library(kableExtra)}
 if (!require(knitr)) {install.packages("knitr"); library(knitr)}
 
-
 ###############################   C O L O U R S   &   T H E M E   #####################################
-
-MC_colours <- colorRampPalette(c("#50027a", "#177e89", "#db3a34", "#ffc857"))
-MC_colours2 <- colorRampPalette(c("#461c6e", "#364281", "#3a8d98", "#5cbd86"))
-MC_col_rating <- c("Excels" = MC_colours(4)[1],
-                   "Accomplished" = MC_colours(4)[2],
-                   "Developing" = MC_colours(4)[3],
-                   "Beginning" = MC_colours(4)[4])
-MC_col_rating2 <- c("Excels" = MC_colours2(4)[1],
-                   "Accomplished" = MC_colours2(4)[2],
-                   "Developing" = MC_colours2(4)[3],
-                   "Beginning" = MC_colours2(4)[4])
-
-
-martina_style2 <- function(base_size = 21) {
-  extrafont::loadfonts(device = "win", quiet = TRUE)
-  font <- "Lato"
-  font_bold  <- "Lato"
-  theme_minimal(base_size = base_size) %+replace%
-    theme(
-      # plot.title = element_text(size = rel(1), face = "bold", margin = margin(0,0,5,0), hjust = 0),
+RM_colours <- colorRampPalette(c("#497367", "#a6c4b8", "#d0b3af", "#c58198"))
+col_rating <- c("Excels" = RM_colours(4)[1], "Accomplished" = RM_colours(4)[2],
+                "Developing" = RM_colours(4)[3], "Beginning" = RM_colours(4)[4] )
+font <- "Lato"
+font_bold  <- "Lato"
+fontsize <- 21
+extrafont::loadfonts(device = "win", quiet = TRUE)
+theme_set(theme_minimal(base_size = fontsize) %+replace% theme(
       rect = element_rect(fill = "transparent"),
       plot.title = element_blank(),
       plot.margin = unit(c(0,20,20,0), "pt"),
@@ -85,10 +59,8 @@ martina_style2 <- function(base_size = 21) {
       axis.title.x = element_text(family=font_bold, size = rel(0.70), vjust = -5),
       axis.title.y = element_blank(),
       axis.text = element_text(family=font, size = rel(0.70)),
-      # axis.line = element_line(color = "black", arrow = arrow(length = unit(0.3, "lines"), type = "closed")),
       legend.position = "top",
       legend.text.align = 0,
-      # legend.title = element_text(family=font_bold, size = rel(0.85), face = "bold"),
       legend.title = element_blank(),
       legend.text = element_text(family=font, size = rel(0.70)),
       legend.key = element_rect(fill = "transparent", colour = NA),
@@ -99,103 +71,51 @@ martina_style2 <- function(base_size = 21) {
       strip.background = element_rect(fill = "#17252D", color = "#17252D"),
       strip.text = element_text(size = rel(0.85), face = "bold", color = "white", margin = margin(5,0,5,0))
     )
-}
-
-theme_set(martina_style2())
-
-
+)
 # language settings 
 Sys.setlocale("LC_ALL","English_United Kingdom")
 
-
-# create paste comma function that will paste with , between elements
-paste_comma <- function (..., sep = ", ", collapse = NULL, recycle0 = FALSE) {
-    if (isTRUE(recycle0)) 
-      .Internal(paste(list(...), sep, collapse, recycle0))
-    else .Internal(paste(list(...), sep, collapse))}
-  
-
 ###############################   L O A D   D A T A   #####################################
-
-speech_feedback <- read.csv(paste0("csv_files/speech_feedback_",meeting_date,".csv"),  stringsAsFactors = FALSE)
+speech_feedback <- read.csv(paste0("csv_files/speech_feedback_",meeting_date,".csv"), stringsAsFactors = FALSE)
 names(speech_feedback) <- c("Time", "Speaker", "Clarity", "VocalVariety", "EyeContact", "Gestures", "Interest", "Liked", "Improve", "Name")
-# extract speech date
-speech_date <- str_trim(str_sub(speech_feedback$Time, 1 , str_locate(speech_feedback$Time, pattern = " ")[1]-1))
-speech_date <- min(as.Date(speech_date, tryFormats = c("%d.%m.%Y", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y", "%m-%d-%Y", "%Y/%m/%d")))
-speech_date <- str_trim(format(speech_date, "%e %B %Y"))
-speech_d <- str_sub(speech_date, 1, str_locate(speech_date, " ")[1]-1)
-speech_d2 <- str_sub(speech_date, str_locate(speech_date, " ")[1]-1, str_locate(speech_date, " ")[1]-1)
-speech_mY <- str_sub(speech_date, str_locate(speech_date, " ")[1]+1, nchar(speech_date))
-day_ord <- case_when(
-  speech_d2 == "1" ~ "st",
-  speech_d2 == "2" ~ "nd",
-  speech_d2 == "3" ~ "rd",
-  TRUE ~ "th")
-speech_date <- paste(paste0(speech_d, day_ord), speech_mY)
 
+# extract speech date
+speech_date <- str_sub(speech_feedback$Time, 1 , str_locate(speech_feedback$Time, pattern = " ")[1]-1) %>% as.Date(tryFormats = c("%d.%m.%Y", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y", "%m-%d-%Y", "%Y/%m/%d")) %>% min %>% format("%e %B %Y") %>% str_trim
+speech_d <- str_sub(speech_date, 1, str_locate(speech_date, " ")[1]-1)
+speech_d2 <- str_sub(speech_d, nchar(speech_d))
+speech_mY <- str_sub(speech_date, str_locate(speech_date, " ")[1]+1, nchar(speech_date))
+day_ord <- case_when(speech_d2 == "1" ~ "st", speech_d2 == "2" ~ "nd", speech_d2 == "3" ~ "rd", TRUE ~ "th")
+speech_date <- paste(paste0(speech_d, day_ord), speech_mY)
 
 # remove duplicate entries
 speech_feedback <- unique(speech_feedback[, 2:ncol(speech_feedback)])
-
 rating_names <- c("Clarity: Spoken language is clear and is easily understood",
   "Vocal Variety: Uses tone speed and volume as tools",
   "Eye Contact: Effectively uses eye contact to engage audience",
   "Gestures: Uses physical gestures effectively",
-  "Interest: Engages audience with interesting well constructed content")
-
-rating_names <- rating_names[5:1]
-
+  "Interest: Engages audience with interesting well constructed content")[5:1]
 evaluation_names <- c("Liked about the speech",
   "What could be improved",
   "Name")
-
 rating <- c("Excels","Accomplished","Developing","Beginning")
-
-speakers <- unique(speech_feedback$Speaker)
+category <- c("Interest","Gestures","EyeContact","VocalVariety", "Clarity")
 titles <- c()
-speaker_feedback <- vector("list", length = length(speakers))
-names(speaker_feedback) <- speakers
+speech_feedback_list <- split(speech_feedback, speech_feedback$Speaker)
+speakers <- names(speech_feedback_list)
 
-
-
-# loop through the speakers to extract relevant data
-
-# for (i in s) {
-# for (i in 1:length(speakers)) {
-# i <- s
-  speaker_feedback[[s]] <- list()
-  speaker_feedback[[s]]$rating <- speech_feedback[speech_feedback$Speaker == speakers[s],c(2:6,9)]
-  speaker_feedback[[s]]$evaluation <- speech_feedback[speech_feedback$Speaker == speakers[s],7:9]
-  speaker_feedback[[s]]$evaluation <- speaker_feedback[[s]]$evaluation[speaker_feedback[[s]]$evaluation$Liked != "" | speaker_feedback[[s]]$evaluation$Improve != "",]
-  names(speaker_feedback[[s]]$evaluation) <- evaluation_names
-  
-  speaker_feedback[[s]]$rating_melt <- melt(speaker_feedback[[s]]$rating, id.vars = c("Name"), 
-                                            measure.vars = c("Clarity", "VocalVariety", "EyeContact", "Gestures", "Interest"),
-                                            variable.name = "Category", value.name = "Rating")
-  speaker_feedback[[s]]$rating_melt <- speaker_feedback[[s]]$rating_melt[is.na(speaker_feedback[[s]]$rating_melt$Rating) == FALSE & speaker_feedback[[s]]$rating_melt$Rating != "",]
-  speaker_feedback[[s]]$rating_melt$Rating <- factor(speaker_feedback[[s]]$rating_melt$Rating, levels = c("Excels","Accomplished","Developing","Beginning"))
-  speaker_feedback[[s]]$rating_melt$Category <- factor(speaker_feedback[[s]]$rating_melt$Category, 
-                                                       levels = c("Interest","Gestures","EyeContact","VocalVariety", "Clarity"))
-  speaker_feedback[[s]]$rating_melt$Rating_num <- case_when(
-    speaker_feedback[[s]]$rating_melt$Rating == "Excels" ~ 4,
-    speaker_feedback[[s]]$rating_melt$Rating == "Accomplished" ~ 3,
-    speaker_feedback[[s]]$rating_melt$Rating == "Developing" ~ 2,
-    speaker_feedback[[s]]$rating_melt$Rating == "Beginning" ~ 1)
-  speaker_feedback[[s]]$rating_melt$Category_Rating <- paste(speaker_feedback[[s]]$rating_melt$Category, speaker_feedback[[s]]$rating_melt$Rating, sep = "_")
-  
-  speaker_feedback[[s]]$rating_dcast <- dcast(speaker_feedback[[s]]$rating_melt, Category ~ Rating)
-  speaker_feedback[[s]]$rating_dcast$Total <- rowSums(speaker_feedback[[s]]$rating_dcast[, 2:ncol(speaker_feedback[[s]]$rating_dcast)])
-  # if ("Beginning" %in% colnames(speaker_feedback[[s]]$rating_dcast)) {speaker_feedback[[s]]$rating_dcast$Beginning <- speaker_feedback[[s]]$rating_dcast$Beginning/speaker_feedback[[s]]$rating_dcast$Total} 
-  # if ("Developing" %in% colnames(speaker_feedback[[s]]$rating_dcast)) {speaker_feedback[[s]]$rating_dcast$Developing <- speaker_feedback[[s]]$rating_dcast$Developing/speaker_feedback[[s]]$rating_dcast$Total} 
-  # if ("Accomplished" %in% colnames(speaker_feedback[[s]]$rating_dcast)) {speaker_feedback[[s]]$rating_dcast$Accomplished <- speaker_feedback[[s]]$rating_dcast$Accomplished/speaker_feedback[[s]]$rating_dcast$Total} 
-  # if ("Excels" %in% colnames(speaker_feedback[[s]]$rating_dcast)) {speaker_feedback[[s]]$rating_dcast$Excels <- speaker_feedback[[s]]$rating_dcast$Excels/speaker_feedback[[s]]$rating_dcast$Total} 
-  speaker_feedback[[s]]$rating_dcast <- speaker_feedback[[s]]$rating_dcast[, 1:ncol(speaker_feedback[[s]]$rating_dcast)-1]
-  speaker_feedback[[s]]$rating_melt2 <- melt(speaker_feedback[[s]]$rating_dcast, id.vars = "Category", variable.name = "Rating", value.name = "Rating_perc")
-  # speaker_feedback[[s]]$rating_melt2$Rating_perc <- percent(speaker_feedback[[s]]$rating_melt2$Rating_perc)
-  speaker_feedback[[s]]$rating_melt2$Rating_perc <- case_when(
-    speaker_feedback[[s]]$rating_melt2$Rating_perc == 1 ~ paste(speaker_feedback[[s]]$rating_melt2$Rating_perc, "attendee"),
-    TRUE ~ paste(speaker_feedback[[s]]$rating_melt2$Rating_perc, "attendees"))
-  speaker_feedback[[s]]$rating_melt <- merge(speaker_feedback[[s]]$rating_melt, speaker_feedback[[s]]$rating_melt2, by = c("Category", "Rating"))
+speaker <- list()
+speaker$rating <- speech_feedback_list[[s]][,c(2:6,9)]
+speaker$evaluation <- speech_feedback_list[[s]][,c(7:9)] %>% subset(.$Liked != "" | .$Improve != "") %>% setNames(evaluation_names)
+speaker$rating_melt <- melt(speaker$rating, id.vars = c("Name"), variable.name = "Category", value.name = "Rating",
+                            measure.vars = c("Clarity", "VocalVariety", "EyeContact", "Gestures", "Interest")) %>%
+  subset(is.na(.$Rating)==FALSE & .$Rating!="") %>% 
+  mutate(Rating = factor(Rating, levels = rating), Category = factor(Category, levels = category),
+         Rating_num = recode(Rating, "Excels"=4, "Accomplished"=3, "Developing"=2, "Beginning"=1),
+         Category_Rating = paste(Category, Rating, sep = "_"))
+speaker$rating_dcast <- dcast(speaker$rating_melt, Category ~ Rating) # %>% mutate(Total = rowSums(.[,2:ncol(.)]))
+speaker$rating_melt2 <- melt(speaker$rating_dcast, id.vars = "Category", variable.name = "Rating", value.name = "Rating_perc") %>%
+  mutate(Rating_perc = case_when(Rating_perc == 1 ~ paste(Rating_perc, "attendee"), TRUE ~ paste(Rating_perc, "attentees")))
+speaker$rating_melt <- left_join(speaker$rating_melt, speaker$rating_melt2, by = c("Category", "Rating"))
 
 if (str_detect(speakers[s], " - ")) {
   titles[s] <- str_sub(speakers[s], str_locate(speakers[s], " - ")[2]+1, nchar(speakers[s]))
@@ -203,12 +123,9 @@ if (str_detect(speakers[s], " - ")) {
 } else {
     speakers[s]
   titles[s] <- params$speechtitle}
-# }
 
 showtitle <- is.na(titles[s]) == FALSE
-
 ```
-
 
 <center>
 
@@ -224,44 +141,20 @@ asis_output((paste0("##### ", titles[s], "\\n")))
 
 </center>
 
-
 #### How attendees evaluated your speech:
   
 ```{r}
-plot_rating1 <- ggplot() + geom_bar_interactive(speaker_feedback[[s]]$rating_melt, mapping = aes(x = ..count../sum(..count..)*5, y = speaker_feedback[[s]]$rating_melt$Category, fill = speaker_feedback[[s]]$rating_melt$Rating, data_id = speaker_feedback[[s]]$rating_melt$Category_Rating,
-                                                                                                 tooltip = Rating_perc), 
-                    alpha = .8, colour = "white", size = 4, width = .6) +
+plot_rating <- ggplot() + geom_bar_interactive(speaker$rating_melt, mapping = aes(x = ..count../sum(..count..)*5, y = speaker$rating_melt$Category, fill = speaker$rating_melt$Rating), alpha = .8, colour = "white", size = 4, width = .6) +
   scale_x_continuous(labels=scales::percent, expand = c(0,0), name = "Percentage of attendees evaluating speech elements") +
-  scale_fill_manual(values = MC_col_rating, breaks = c("Excels","Accomplished","Developing","Beginning")[4:1]) +
+  scale_fill_manual(values = col_rating, breaks = c("Excels","Accomplished","Developing","Beginning")[4:1]) +
   scale_y_discrete(labels = str_wrap(rating_names, 35))
-
-ggiraph(code = {print(plot_rating1)}, width_svg = 9.5, height_svg = 4.8,
-        tooltip_extra_css = "font-family:Lato;font-weight:bold;font-size:14px", hover_css = "r:10pt;opacity:.8" ) 
-
-# plot_rating2 <- ggplot() + geom_bar(speaker_feedback[[s]]$rating_melt, mapping = aes(y = speaker_feedback[[s]]$rating_melt$Category, fill = speaker_feedback[[s]]$rating_melt$Rating), 
-#                     alpha = .8, colour = "white", size = .5, width = .6) +
-#   # scale_x_continuous(labels=scales::percent, expand = c(0,0), name = "Percentage of attendees evaluating speech elements") +
-#   scale_fill_manual(values = MC_col_rating, breaks = c("Excels","Accomplished","Developing","Beginning")[4:1]) +
-#   scale_y_discrete(labels = str_wrap(rating_names, 35))
-# 
-# plot_rating2
-# ggiraph(code = {print(plot_rating2)}, width_svg = 9.5, height_svg = 4.8,
-#         tooltip_extra_css = "font-family:Lato;font-weight:bold;font-size:14px", hover_css = "r:10pt;opacity:.8" ) 
+ggiraph(code = {print(plot_rating)}, width_svg = 9.5, height_svg = 4.8 ) 
 ```
-
 
 #### What attendees liked about the speech and their suggestions:
 
 ```{r}
-
-# reactable(speaker_feedback[[s]]$evaluation, sortable = FALSE, highlight = TRUE, pagination = FALSE,
-#           columns = list('Liked about the speech' = colDef(maxWidth = 305),'What could be improved' = colDef(maxWidth = 305), Name = colDef(maxWidth = 100)),)
-
-# kableExtra::column_spec(knitr::kable(x = speaker_feedback[[s]]$evaluation, row.names = FALSE), column = c(1:2), width = "350px")
-# knitr::kable(x = speaker_feedback[[s]]$evaluation, row.names = FALSE)
-row.names(speaker_feedback[[s]]$evaluation) <- NULL
-formattable::format_table(speaker_feedback[[s]]$evaluation, align = "l")
-
+row.names(speaker$evaluation) <- NULL
+speaker$evaluation[is.na(speaker$evaluation)] <- ""
+formattable::format_table(speaker$evaluation, align = "l")
 ```
-
-
